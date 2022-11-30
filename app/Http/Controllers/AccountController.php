@@ -15,52 +15,31 @@ class AccountController extends Controller
     public function CreateAccount(Request $request)
     {
         $response = array();
-        $request->validate([
-            'email' => 'required|email|max:255|regex:/(.*)@myemail\.com/i|unique:users'
-        ]);
 
         if (empty($request)) {
 
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
         } else {
-            if (empty($request->emailaddress)) {
 
-                $check_existing_phonenumber = DB::table('account')->select('*')->where('Phone_number', $request->phonenumber)->limit(1);
+            $incomingData = $request->CreateAccount;
+            $check_email_phone = $this->validate_email_or_phone($incomingData);
 
-                if ($check_existing_phonenumber) {
-                    $response['message'] = " phone number '.$request->phonenumber.' already exist and Account not created";
-                    $response['status'] = 'failed';
-                } else {
-                    if (is_numeric($request->phonenumber)) {
-                        $create_account = DB::table('account')->insert([
-                            'Phone_number' => $request->phonenumber,
-                        ]);
+            if ($check_email_phone == 'email') {
 
-                        if ($create_account) {
-                            $response['message'] = " Account Created Successfully with phone number '.$request->phonenumber.'";
-                            $response['status'] = 'success';
-                        } else {
-                            $response['message'] = 'Account Cannot be created';
-                            $response['status'] = 'failed';
-                        }
-                    }
-                }
-            } elseif (empty($request->phonenumber)) {
-
-                $check_existing_emailaddress = DB::table('account')->select('*')->where('Email_address', $request->emailaddress)->limit(1);
+                $check_existing_emailaddress = DB::table('account')->select('*')->where('Email_address', $incomingData)->limit(1);
 
                 if ($check_existing_emailaddress) {
-                    $response['message'] = " Emailaddress'.$request->emailaddress.' already exist and Account not created";
+                    $response['message'] = " Emailaddress'.$incomingData.' already exist and Account not created";
                     $response['status'] = 'failed';
                 } else {
 
                     $create_account = DB::table('account')->insert([
-                        'Email_address' => $request->emailaddress,
+                        'Email_address' => $incomingData,
                     ]);
 
                     if ($create_account) {
-                        $response['message'] = " Account Created Successfully with Email '.$request->emailaddress.'";
+                        $response['message'] = " Account Created Successfully with Email '.$incomingData.'";
                         $response['status'] = 'success';
                     } else {
                         $response['message'] = 'Account Cannot be created';
@@ -68,20 +47,37 @@ class AccountController extends Controller
                     }
                 }
             } else {
-                $response['message'] = 'please ensure all input are not empty';
-                $response['status'] = 'failed';
+                $check_existing_phonenumber = DB::table('account')->select('*')->where('Phone_number', $incomingData)->limit(1);
+
+                if ($check_existing_phonenumber) {
+                    $response['message'] = " phone number '.$incomingData' already exist and Account not created";
+                    $response['status'] = 'failed';
+                } else {
+                    $create_account = DB::table('account')->insert([
+                        'Phone_number' => $incomingData,
+                    ]);
+
+                    if ($create_account) {
+                        $response['message'] = " Account Created Successfully with phone number '.$incomingData.'";
+                        $response['status'] = 'success';
+                    } else {
+                        $response['message'] = 'Account Cannot be created';
+                        $response['status'] = 'failed';
+                    }
+                }
             }
+            $response['message'] = 'please ensure all input are not empty';
+            $response['status'] = 'failed';
         }
         return new AccountResource($response);
     }
-
 
     public function verifiyaccount(Request $request)
     {
     }
 
-    //
-    public function UpdateAccount(Request $request)
+
+    public function UpdateAccount(Request $request, $UpdateAccount)
     {
         $response = array();
         //$incomingData = $request;
@@ -90,27 +86,87 @@ class AccountController extends Controller
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
         } else {
-            if (
-                empty($request->fullname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
-                || empty($request->residentialaddress)
-            ) {
+            $incomingData_update = $UpdateAccount;
+            if (empty($incomingData_update)) {
                 $response['message'] = 'please ensure all input are not empty';
                 $response['status'] = 'failed';
             } else {
-                $update_acc_rec = DB::table('users')
-                    ->where('Email_address', $request->emailaddress)
-                    ->orWhere('Phone_number', '=', $request->phonenumber)
-                    ->update(
-                        ['First_name' => $request->fullname],
-                        ['Last_name' => $request->lastname],
-                        ['Email_address' => $request->emailaddress],
-                        ['Phone_number' => $request->phonenumber],
-                        ['Residential_address' => $request->residentialaddress]
 
-                    );
-                dd($request);
+                $check_email_phone = $this->validate_email_or_phone($incomingData);
+
+                if ($check_email_phone == 'phone') {
+
+                    if (
+                        empty($request->fullname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
+                        || empty($request->residentialaddress)
+                    ) {
+
+                        $response['message'] = 'please ensure all input are not empty';
+                        $response['status'] = 'failed';
+                    } else {
+                        $update_acc_rec = DB::table('account')
+                            ->where('Phone_number', $incomingData_update)
+                            ->update(
+                                ['First_name' => $request->fullname],
+                                ['Last_name' => $request->lastname],
+                                ['Email_address' => $request->emailaddress],
+                                ['Phone_number' => $request->phonenumber],
+                                ['Residential_address' => $request->residentialaddress]
+
+                            );
+                        if ($update_acc_rec) {
+                            $response['message'] = 'Account has been updated';
+                            $response['status'] = 'failed';
+                        } else {
+                            $response['message'] = 'please ensure all input are not empty';
+                            $response['status'] = 'failed';
+                        }
+                    }
+                } else {
+                    if (
+                        empty($request->fullname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
+                        || empty($request->residentialaddress)
+                    ) {
+
+                        $response['message'] = 'please ensure all input are not empty';
+                        $response['status'] = 'failed';
+                    } else {
+                        $update_acc_rec = DB::table('account')
+                            ->where('Email_address', $incomingData_update)
+                            ->update(
+                                ['First_name' => $request->fullname],
+                                ['Last_name' => $request->lastname],
+                                ['Email_address' => $request->emailaddress],
+                                ['Phone_number' => $request->phonenumber],
+                                ['Residential_address' => $request->residentialaddress]
+
+                            );
+                        if ($update_acc_rec) {
+                            $response['message'] = 'Account has been updated';
+                            $response['status'] = 'failed';
+                        } else {
+                            $response['message'] = 'please ensure all input are not empty';
+                            $response['status'] = 'failed';
+                        }
+                    }
+                }
             }
         }
-        echo json_encode($response);
+        return new AccountResource($response);
+    }
+
+    public function image_upload()
+    {
+    }
+    public function validate_email_or_phone($create_type_number_or_phone)
+    {
+        if (is_numeric($create_type_number_or_phone)) {
+            $field = 'phone';
+        } elseif (filter_var($create_type_number_or_phone, FILTER_VALIDATE_EMAIL)) {
+            $field = 'email';
+        } else {
+            $field = '';
+        }
+        return $field;
     }
 }
