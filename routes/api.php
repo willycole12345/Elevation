@@ -19,5 +19,8 @@ use App\Http\Controllers\AccountController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::post('/CreateAccount', [AccountController::class, 'CreateAccount']);
-Route::patch('/UpdateAccount/{UpdateAccount}', [BookController::class, 'UpdateAccount']);
+Route::patch('/UpdateAccount/{UpdateAccount}', [AccountController::class, 'UpdateAccount']);
+//Route::get('send-mail', [AccountController::class, 'sendVerificationmail']);
+Route::get('verify_users', [AccountController::class, 'verify_users']);

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Account;
 
-class UsersController extends Controller
+
+class EmailVerification extends Controller
 {
 }
