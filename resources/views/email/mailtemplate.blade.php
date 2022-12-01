@@ -9,6 +9,7 @@
     {{-- {{ dd($mailData) }} --}}
 
     <h1>{{ $mailData['title'] }}</h1>
+    <h1>{{ $mailData['code'] }}</h1>
     {{-- <p>{{ $mail['body'] }}</p>
     <h3> verification Code </h3>
     <p>{{ $mail['code'] }}</p> --}}

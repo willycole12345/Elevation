@@ -46,7 +46,7 @@ class AccountController extends Controller
                         'verify_flag' => 'N'
                     ]);
                     if ($create_account) {
-                        //      $this->sendVerificationmail($incomingData, $code);
+                        $this->sendVerificationmail($incomingData, $code);
                         $response['message'] = " Account Created Successfully with Email '.$incomingData.'";
                         $response['status'] = 'success';
                     } else {
@@ -68,7 +68,7 @@ class AccountController extends Controller
                         'otp' => $code,
                         'verify_flag' => 'N'
                     ]);
-                    //   $this->sendVerificationmail($incomingData, $code);
+                    $this->sendVerificationmail($incomingData, $code);
                     if ($create_account_phne) {
                         $response['message'] = " Account Created Successfully with phone number '.$incomingData.'";
                         $response['status'] = 'success';
@@ -90,7 +90,7 @@ class AccountController extends Controller
         $verication_code = rand(10, 100);
         $mailData = [
             "title" => 'verification code',
-            "verification code" => $vercode,
+            "code" => $vercode,
 
         ];
         //Mail::to($email)->send(new VerificationMail($mailDa));
@@ -103,13 +103,14 @@ class AccountController extends Controller
         //  dd($retrn);
 
     }
-    public function sendVerificationmail_test($email, $vercode)
+    public function sendVerificationmail_test()
     {
 
         $verication_code = rand(10, 100);
         $email = "cole.williams84@yahoo.com";
         $mailData = [
             "title" => 'verification code',
+            "code" => $verication_code,
 
         ];
         //Mail::to($email)->send(new VerificationMail($mailDa));
