@@ -122,6 +122,7 @@ class AccountController extends Controller
     public function verify_users(Request $request)
     {
 
+        $response = array();
         if (empty($request)) {
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
@@ -238,12 +239,16 @@ class AccountController extends Controller
 
     public function image_upload(Request $request, $UpdateImage)
     {
+        $response = array();
         if (empty($request)) {
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
         } else {
             if (empty($request->profile_image)) {
+                $response['message'] = 'please ensure all input are not empty';
+                $response['status'] = 'failed';
             } else {
+
                 $check_email_phone = $this->validate_email_or_phone($UpdateImage);
                 if ($check_email_phone == 'phone') {
                     $file = $request->file('profile_image');
@@ -251,41 +256,41 @@ class AccountController extends Controller
                     $title = uniqid() . '.' . $file_dd;
                     $imagepath = $file->move(public_path('images'), $title);
                     $update_acc_rec = DB::table('accounts')
-                        ->where('Phone_number', $check_email_phone)
-                        ->update(['Profile_picture' => $title]);
+                        ->where('Phone_number', $UpdateImage)
+                        ->update([
+                            'Profile_picture' => $title
+                        ]);
                     if ($update_acc_rec) {
                         $response['message'] = 'Profile Image uploaded sucessfully';
                         $response['status'] = 'success';
                     } else {
-                        $response['message'] = 'Account has been updated';
+                        $response['message'] = 'Profile Image not sucessfullyd';
                         $response['status'] = 'failed';
                     }
                 } else {
                     $file = $request->file('profile_image');
-                    // dd($file);
                     $file_dd = $file->getClientOriginalExtension();
                     $title = uniqid() . '.' . $file_dd;
                     $imagepath = $file->move(public_path('images'), $title);
-                    // dd($title);
+                    // dd($check_email_phone);
                     $update_acc_rec = DB::table('accounts')
-                        ->where('email', $check_email_phone)
+                        ->where('email', $UpdateImage)
                         ->update([
-                            'Profile_picture' => $title,
+                            'Profile_picture' => $title
                         ]);
-
+                    //  dd($update_acc_rec);
                     if ($update_acc_rec) {
                         $response['message'] = 'Profile Image uploaded sucessfully';
                         $response['status'] = 'success';
                     } else {
-                        $response['message'] = 'Account has been updated';
+                        $response['message'] = 'Profile Image not sucessfully';
                         $response['status'] = 'failed';
                     }
                 }
             }
-            return new AccountResource($response);
         }
+        return new AccountResource($response);
     }
-
     public function validate_email_or_phone($create_type_number_or_phone)
     {
         if (is_numeric($create_type_number_or_phone)) {
