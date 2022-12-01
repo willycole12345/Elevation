@@ -46,7 +46,7 @@ class AccountController extends Controller
                         'verify_flag' => 'N'
                     ]);
                     if ($create_account) {
-                        $this->sendVerificationmail($incomingData, $code);
+                        //      $this->sendVerificationmail($incomingData, $code);
                         $response['message'] = " Account Created Successfully with Email '.$incomingData.'";
                         $response['status'] = 'success';
                     } else {
@@ -68,7 +68,7 @@ class AccountController extends Controller
                         'otp' => $code,
                         'verify_flag' => 'N'
                     ]);
-                    $this->sendVerificationmail($incomingData, $code);
+                    //   $this->sendVerificationmail($incomingData, $code);
                     if ($create_account_phne) {
                         $response['message'] = " Account Created Successfully with phone number '.$incomingData.'";
                         $response['status'] = 'success';
@@ -88,7 +88,6 @@ class AccountController extends Controller
     {
 
         $verication_code = rand(10, 100);
-        $email = "cole.williams84@yahoo.com";
         $mailData = [
             "title" => 'verification code',
             "verification code" => $vercode,
@@ -122,22 +121,26 @@ class AccountController extends Controller
 
     public function verify_users(Request $request)
     {
-        if ($request) {
+
+        if (empty($request)) {
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
         } else {
+            //dd($request);
             $incomingData = $request->emailaddress;
-            $check_existing = DB::table('accounts')->where('email', '=', $incomingData);
+            $check_existing = DB::table('accounts')->select('otp')->where('email', $incomingData)->get();
+            // dd($check_existing);
             if ($check_existing) {
-                if ($check_existing->otp == $request->otpcode) {
+                if ($check_existing[0]->otp == $request->otpcode) {
                     //update
-                    $update_otp = DB::table('account')
+                    // echo 'here';
+                    $update_otp = DB::table('accounts')
                         ->where('otp', $request->otpcode)
                         ->update(
                             ['verify_flag' => 'Y']
                         );
                     if ($update_otp) {
-                        $response['message'] = 'Your Account has be verified successfully';
+                        $response['message'] = 'Your Account has been verified successfully';
                         $response['status'] = 'success';
                     } else {
                         $response['message'] = 'Kindly confirm your otp';
@@ -147,8 +150,8 @@ class AccountController extends Controller
                     $response['message'] = 'please ensure your otp is correct';
                     $response['status'] = 'failed';
                 }
+                return new AccountResource($response);
             }
-            return new AccountResource($response);
         }
     }
 
@@ -163,35 +166,36 @@ class AccountController extends Controller
         } else {
             $incomingData_update = $UpdateAccount;
             if (empty($incomingData_update)) {
-                $response['message'] = 'please ensure all input are not empty';
+                $response['message'] = 'pleasde ensure all input are not empty';
                 $response['status'] = 'failed';
             } else {
-
                 $check_email_phone = $this->validate_email_or_phone($incomingData_update);
 
                 if ($check_email_phone == 'phone') {
 
                     if (
-                        empty($request->fullname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
+                        empty($request->firstname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
                         || empty($request->residentialaddress)
                     ) {
 
-                        $response['message'] = 'please ensure all input are not empty';
+                        $response['message'] = 'please ensure alppl input are not empty';
                         $response['status'] = 'failed';
                     } else {
-                        $update_acc_rec = DB::table('account')
+                        $update_acc_rec = DB::table('accounts')
                             ->where('Phone_number', $incomingData_update)
                             ->update(
-                                ['First_name' => $request->fullname],
-                                ['Last_name' => $request->lastname],
-                                ['email' => $request->emailaddress],
-                                ['Phone_number' => $request->phonenumber],
-                                ['Residential_address' => $request->residentialaddress]
-
+                                [
+                                    'firstname' => $request->firstname,
+                                    'lastname' => $request->lastname,
+                                    'email' => $request->emailaddress,
+                                    'Phone_number' => $request->phonenumber,
+                                    'Residential_address' => $request->residentialaddress
+                                ]
                             );
+                        // dd($update_acc_rec);
                         if ($update_acc_rec) {
                             $response['message'] = 'Account has been updated';
-                            $response['status'] = 'failed';
+                            $response['status'] = 'success';
                         } else {
                             $response['message'] = 'please ensure all input are not empty';
                             $response['status'] = 'failed';
@@ -199,26 +203,28 @@ class AccountController extends Controller
                     }
                 } else {
                     if (
-                        empty($request->fullname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
+                        empty($request->firstname) || empty($request->lastname) || empty($request->emailaddress) || empty($request->phonenumber)
                         || empty($request->residentialaddress)
                     ) {
 
-                        $response['message'] = 'please ensure all input are not empty';
+                        $response['message'] = 'please ensure all [[input are not empty';
                         $response['status'] = 'failed';
                     } else {
-                        $update_acc_rec = DB::table('account')
-                            ->where('Email_address', $incomingData_update)
+                        $update_acc_rec = DB::table('accounts')
+                            ->where('email', $incomingData_update)
                             ->update(
-                                ['First_name' => $request->fullname],
-                                ['Last_name' => $request->lastname],
-                                ['email' => $request->emailaddress],
-                                ['Phone_number' => $request->phonenumber],
-                                ['Residential_address' => $request->residentialaddress]
+                                [
+                                    'firstname' => $request->firstname,
+                                    'lastname' => $request->lastname,
+                                    'email' => $request->emailaddress,
+                                    'Phone_number' => $request->phonenumber,
+                                    'Residential_address' => $request->residentialaddress
+                                ]
 
                             );
                         if ($update_acc_rec) {
                             $response['message'] = 'Account has been updated';
-                            $response['status'] = 'failed';
+                            $response['status'] = 'success';
                         } else {
                             $response['message'] = 'please ensure all input are not empty';
                             $response['status'] = 'failed';
@@ -236,15 +242,15 @@ class AccountController extends Controller
             $response['message'] = 'please ensure all input are not empty';
             $response['status'] = 'failed';
         } else {
-            if (empty($request->profileImage)) {
+            if (empty($request->profile_image)) {
             } else {
                 $check_email_phone = $this->validate_email_or_phone($UpdateImage);
                 if ($check_email_phone == 'phone') {
                     $file = $request->file('profile_image');
                     $file_dd = $file->getClientOriginalExtension();
                     $title = uniqid() . '.' . $file_dd;
-                    $imagepath = $file->move(public_path('images'), $file_dd);
-                    $update_acc_rec = DB::table('account')
+                    $imagepath = $file->move(public_path('images'), $title);
+                    $update_acc_rec = DB::table('accounts')
                         ->where('Phone_number', $check_email_phone)
                         ->update(['Profile_picture' => $title]);
                     if ($update_acc_rec) {
@@ -256,12 +262,16 @@ class AccountController extends Controller
                     }
                 } else {
                     $file = $request->file('profile_image');
+                    // dd($file);
                     $file_dd = $file->getClientOriginalExtension();
                     $title = uniqid() . '.' . $file_dd;
-                    $imagepath = $file->move(public_path('images'), $file_dd);
-                    $update_acc_rec = DB::table('account')
+                    $imagepath = $file->move(public_path('images'), $title);
+                    // dd($title);
+                    $update_acc_rec = DB::table('accounts')
                         ->where('email', $check_email_phone)
-                        ->update(['Profile_picture' => $title]);
+                        ->update([
+                            'Profile_picture' => $title,
+                        ]);
 
                     if ($update_acc_rec) {
                         $response['message'] = 'Profile Image uploaded sucessfully';

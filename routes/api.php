@@ -23,4 +23,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/CreateAccount', [AccountController::class, 'CreateAccount']);
 Route::patch('/UpdateAccount/{UpdateAccount}', [AccountController::class, 'UpdateAccount']);
 //Route::get('send-mail', [AccountController::class, 'sendVerificationmail']);
-Route::get('verify_users', [AccountController::class, 'verify_users']);
+Route::post('verify_users', [AccountController::class, 'verify_users']);
+
+Route::post('image_upload/{UpdateImage}', [AccountController::class, 'image_upload']);

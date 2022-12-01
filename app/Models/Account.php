@@ -17,9 +17,9 @@ class Account extends Model
         'firstname',
         'lastname',
         'email',
-        'phonenumber',
-        'profileimage',
-        'residentialaddress'
+        'Phone_number',
+        'Profile_picture',
+        'Residential_address'
     ];
 
     /**
